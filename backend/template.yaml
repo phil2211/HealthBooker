@@ -74,7 +74,7 @@ Resources:
   RegisterFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/auth/
+      CodeUri: functions/auth/register/
       Handler: register.handler
       Events:
         RegisterApi:
@@ -91,7 +91,7 @@ Resources:
   LoginFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/auth/
+      CodeUri: functions/auth/login/
       Handler: login.handler
       Events:
         LoginApi:
@@ -108,7 +108,7 @@ Resources:
   VerifyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/auth/
+      CodeUri: functions/auth/verify/
       Handler: verify.handler
       Events:
         VerifyApi:
@@ -126,7 +126,7 @@ Resources:
   GetProfileFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/therapist/
+      CodeUri: functions/therapist/getProfile/
       Handler: getProfile.handler
       Events:
         GetProfileApi:
@@ -143,7 +143,7 @@ Resources:
   GetAvailabilityFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/therapist/
+      CodeUri: functions/therapist/getAvailability/
       Handler: getAvailability.handler
       Events:
         GetAvailabilityApi:
@@ -160,7 +160,7 @@ Resources:
   UpdateAvailabilityFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/therapist/
+      CodeUri: functions/therapist/updateAvailability/
       Handler: updateAvailability.handler
       Events:
         UpdateAvailabilityApi:
@@ -177,7 +177,7 @@ Resources:
   GetBookingsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/therapist/
+      CodeUri: functions/therapist/getBookings/
       Handler: getBookings.handler
       Events:
         GetBookingsApi:
@@ -195,7 +195,7 @@ Resources:
   CreateBookingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/booking/
+      CodeUri: functions/booking/create/
       Handler: create.handler
       Events:
         CreateBookingApi:
@@ -212,7 +212,7 @@ Resources:
   CancelBookingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/booking/
+      CodeUri: functions/booking/cancel/
       Handler: cancel.handler
       Events:
         CancelBookingApi:

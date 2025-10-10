@@ -1,0 +1,10 @@
+{
+  "name": "get-availability-function",
+  "version": "1.0.0",
+  "description": "Get therapist availability Lambda function",
+  "main": "getAvailability.js",
+  "dependencies": {
+    "aws-sdk": "^2.1490.0",
+    "mongoose": "^8.0.3"
+  }
+}

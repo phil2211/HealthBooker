@@ -1,0 +1,11 @@
+{
+  "name": "cancel-booking-function",
+  "version": "1.0.0",
+  "description": "Cancel booking Lambda function",
+  "main": "cancel.js",
+  "dependencies": {
+    "aws-sdk": "^2.1490.0",
+    "mongoose": "^8.0.3",
+    "nodemailer": "^6.9.7"
+  }
+}

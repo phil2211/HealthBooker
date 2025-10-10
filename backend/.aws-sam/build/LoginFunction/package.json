@@ -1,0 +1,12 @@
+{
+  "name": "login-function",
+  "version": "1.0.0",
+  "description": "Therapist login Lambda function",
+  "main": "login.js",
+  "dependencies": {
+    "aws-sdk": "^2.1490.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3"
+  }
+}

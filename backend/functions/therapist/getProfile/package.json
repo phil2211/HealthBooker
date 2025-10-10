@@ -1,0 +1,10 @@
+{
+  "name": "get-profile-function",
+  "version": "1.0.0",
+  "description": "Get therapist profile Lambda function",
+  "main": "getProfile.js",
+  "dependencies": {
+    "aws-sdk": "^2.1490.0",
+    "mongoose": "^8.0.3"
+  }
+}
