@@ -8,14 +8,14 @@ Globals:
     Runtime: nodejs18.x
     Environment:
       Variables:
-        MONGODB_URI: !Ref MongoDBUri
-        JWT_SECRET: !Ref JwtSecret
-        SMTP_HOST: !Ref SmtpHost
-        SMTP_PORT: !Ref SmtpPort
-        SMTP_USER: !Ref SmtpUser
-        SMTP_PASS: !Ref SmtpPass
-        FROM_EMAIL: !Ref FromEmail
-        BASE_URL: !Ref BaseUrl
+        MONGODB_URI: mongodb+srv://admin:Passw0rd@demos.nmevhfs.mongodb.net/?retryWrites=true&w=majority&appName=HealthBooker/healthbooker
+        JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+        SMTP_HOST: smtp.mailtrap.io
+        SMTP_PORT: '587'
+        SMTP_USER: your-mailtrap-username
+        SMTP_PASS: your-mailtrap-password
+        FROM_EMAIL: noreply@healthbooker.local
+        BASE_URL: http://localhost:3000
 
 Parameters:
   MongoDBUri:
@@ -75,7 +75,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/auth/register/
-      Handler: register.handler
+      Handler: register-working.handler
       Events:
         RegisterApi:
           Type: Api

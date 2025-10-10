@@ -1,28 +1,6 @@
-import mongoose, { Document, Schema } from 'mongoose';
+const mongoose = require('mongoose');
 
-export interface ITherapist extends Document {
-  _id: string;
-  email: string;
-  passwordHash: string;
-  name: string;
-  specialization: string;
-  bio: string;
-  photoUrl?: string;
-  weeklyAvailability: {
-    day: number; // 0 = Sunday, 1 = Monday, etc.
-    startTime: string; // HH:mm format
-    endTime: string; // HH:mm format
-  }[];
-  blockedSlots: {
-    date: string; // YYYY-MM-DD format
-    startTime: string; // HH:mm format
-    endTime: string; // HH:mm format
-  }[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const therapistSchema = new Schema<ITherapist>({
+const therapistSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -92,4 +70,6 @@ const therapistSchema = new Schema<ITherapist>({
   timestamps: true
 });
 
-export const Therapist = mongoose.model<ITherapist>('Therapist', therapistSchema);
+module.exports = {
+  Therapist: mongoose.model('Therapist', therapistSchema)
+};

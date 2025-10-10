@@ -1,25 +1,20 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-export interface TokenPayload {
-  therapistId: string;
-  email: string;
-}
-
-export const generateToken = (payload: TokenPayload): string => {
+const generateToken = (payload) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 };
 
-export const verifyToken = (token: string): TokenPayload => {
+const verifyToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
     throw new Error('Invalid or expired token');
   }
 };
 
-export const extractTokenFromHeader = (authHeader?: string): string | null => {
+const extractTokenFromHeader = (authHeader) => {
   if (!authHeader) return null;
   
   const parts = authHeader.split(' ');
@@ -28,4 +23,10 @@ export const extractTokenFromHeader = (authHeader?: string): string | null => {
   }
   
   return parts[1];
+};
+
+module.exports = {
+  generateToken,
+  verifyToken,
+  extractTokenFromHeader
 };

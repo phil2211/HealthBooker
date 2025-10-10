@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-let cachedConnection: mongoose.Connection | null = null;
+let cachedConnection = null;
 
-export const connectToDatabase = async (): Promise<mongoose.Connection> => {
+const connectToDatabase = async () => {
   if (cachedConnection && cachedConnection.readyState === 1) {
     return cachedConnection;
   }
@@ -28,10 +28,15 @@ export const connectToDatabase = async (): Promise<mongoose.Connection> => {
   }
 };
 
-export const disconnectFromDatabase = async (): Promise<void> => {
+const disconnectFromDatabase = async () => {
   if (cachedConnection) {
     await mongoose.disconnect();
     cachedConnection = null;
     console.log('Disconnected from MongoDB');
   }
+};
+
+module.exports = {
+  connectToDatabase,
+  disconnectFromDatabase
 };

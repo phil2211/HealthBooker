@@ -1,12 +1,9 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import bcrypt from 'bcryptjs';
-import { connectToDatabase, Therapist } from './layers';
-import { createResponse, createErrorResponse, parseBody, handleCors } from './layers/utils/apiHelpers';
-import { generateToken } from './layers/utils/auth';
+const bcrypt = require('bcryptjs');
+const { connectToDatabase, Therapist } = require('./layers');
+const { createResponse, createErrorResponse, parseBody, handleCors } = require('./layers/utils/apiHelpers');
+const { generateToken } = require('./layers/utils/auth');
 
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
+exports.handler = async (event) => {
   // Handle CORS
   const corsResponse = handleCors(event);
   if (corsResponse) return corsResponse;
