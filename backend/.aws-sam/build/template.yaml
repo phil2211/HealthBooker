@@ -81,7 +81,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: LoginFunction
-      Handler: login.handler
+      Handler: login-working.handler
       Events:
         LoginApi:
           Type: Api
@@ -100,7 +100,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: VerifyFunction
-      Handler: verify.handler
+      Handler: verify-working.handler
       Events:
         VerifyApi:
           Type: Api
@@ -119,7 +119,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: GetProfileFunction
-      Handler: getProfile.handler
+      Handler: getProfile-working.handler
       Events:
         GetProfileApi:
           Type: Api
@@ -138,7 +138,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: GetAvailabilityFunction
-      Handler: getAvailability.handler
+      Handler: getAvailability-working.handler
       Events:
         GetAvailabilityApi:
           Type: Api
@@ -157,7 +157,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: UpdateAvailabilityFunction
-      Handler: updateAvailability.handler
+      Handler: updateAvailability-working.handler
       Events:
         UpdateAvailabilityApi:
           Type: Api
@@ -176,7 +176,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: GetBookingsFunction
-      Handler: getBookings.handler
+      Handler: getBookings-working.handler
       Events:
         GetBookingsApi:
           Type: Api
@@ -195,7 +195,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: CreateBookingFunction
-      Handler: create.handler
+      Handler: create-working.handler
       Events:
         CreateBookingApi:
           Type: Api
@@ -214,7 +214,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: CancelBookingFunction
-      Handler: cancel.handler
+      Handler: cancel-working.handler
       Events:
         CancelBookingApi:
           Type: Api

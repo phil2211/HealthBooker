@@ -92,7 +92,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/auth/login/
-      Handler: login.handler
+      Handler: login-working.handler
       Events:
         LoginApi:
           Type: Api
@@ -109,7 +109,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/auth/verify/
-      Handler: verify.handler
+      Handler: verify-working.handler
       Events:
         VerifyApi:
           Type: Api
@@ -127,7 +127,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/therapist/getProfile/
-      Handler: getProfile.handler
+      Handler: getProfile-working.handler
       Events:
         GetProfileApi:
           Type: Api
@@ -144,7 +144,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/therapist/getAvailability/
-      Handler: getAvailability.handler
+      Handler: getAvailability-working.handler
       Events:
         GetAvailabilityApi:
           Type: Api
@@ -161,7 +161,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/therapist/updateAvailability/
-      Handler: updateAvailability.handler
+      Handler: updateAvailability-working.handler
       Events:
         UpdateAvailabilityApi:
           Type: Api
@@ -178,7 +178,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/therapist/getBookings/
-      Handler: getBookings.handler
+      Handler: getBookings-working.handler
       Events:
         GetBookingsApi:
           Type: Api
@@ -196,7 +196,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/booking/create/
-      Handler: create.handler
+      Handler: create-working.handler
       Events:
         CreateBookingApi:
           Type: Api
@@ -213,7 +213,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/booking/cancel/
-      Handler: cancel.handler
+      Handler: cancel-working.handler
       Events:
         CancelBookingApi:
           Type: Api
