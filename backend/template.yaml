@@ -8,14 +8,14 @@ Globals:
     Runtime: nodejs18.x
     Environment:
       Variables:
-        MONGODB_URI: mongodb+srv://admin:Passw0rd@healthbooker.dxxqtvv.mongodb.net/healtbooker?retryWrites=true&w=majority&appName=HealthBooker
-        JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
-        SMTP_HOST: smtp.mailtrap.io
-        SMTP_PORT: '587'
-        SMTP_USER: your-mailtrap-username
-        SMTP_PASS: your-mailtrap-password
-        FROM_EMAIL: noreply@healthbooker.local
-        BASE_URL: http://localhost:3000
+        MONGODB_URI: !Ref MongoDBUri
+        JWT_SECRET: !Ref JwtSecret
+        SMTP_HOST: !Ref SmtpHost
+        SMTP_PORT: !Ref SmtpPort
+        SMTP_USER: !Ref SmtpUser
+        SMTP_PASS: !Ref SmtpPass
+        FROM_EMAIL: !Ref FromEmail
+        BASE_URL: !Ref BaseUrl
 
 Parameters:
   MongoDBUri:
@@ -26,12 +26,12 @@ Parameters:
   JwtSecret:
     Type: String
     Description: JWT secret key for authentication
-    Default: your-super-secret-jwt-key
+    Default: your-super-secret-jwt-key-change-this-in-production
   
   SmtpHost:
     Type: String
     Description: SMTP host for email notifications
-    Default: localhost
+    Default: smtp.mailtrap.io
   
   SmtpPort:
     Type: String
@@ -41,23 +41,23 @@ Parameters:
   SmtpUser:
     Type: String
     Description: SMTP username
-    Default: ''
+    Default: your-mailtrap-username
   
   SmtpPass:
     Type: String
     Description: SMTP password
     NoEcho: true
-    Default: ''
+    Default: your-mailtrap-password
   
   FromEmail:
     Type: String
     Description: From email address
-    Default: noreply@healthbooker.com
+    Default: noreply@healthbooker.local
   
   BaseUrl:
     Type: String
     Description: Base URL for the application
-    Default: https://your-domain.com
+    Default: http://localhost:3000
 
 Resources:
   # API Gateway

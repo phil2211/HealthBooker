@@ -27,10 +27,10 @@ echo ""
 
 # Check if API is running
 echo -e "${YELLOW}Checking if API is running...${NC}"
-if ! curl -s http://localhost:3001/auth/register > /dev/null 2>&1; then
+if ! curl -s -X POST http://localhost:3001/auth/register -H "Content-Type: application/json" -d '{}' > /dev/null 2>&1; then
     echo -e "${RED}❌ API is not running on localhost:3001${NC}"
     echo -e "${YELLOW}Please start the API server first:${NC}"
-    echo "  cd backend && sam local start-api --port 3001 --host 0.0.0.0"
+    echo "  cd backend && sam local start-api --port 3001 --host 0.0.0.0 --env-vars env.json"
     exit 1
 fi
 

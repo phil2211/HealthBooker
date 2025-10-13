@@ -12,8 +12,9 @@ echo "=========================================="
 # Test 1: Register a new therapist
 echo "Testing therapist registration..."
 timestamp=$(date +%s)
+TEST_EMAIL="test-$timestamp@example.com"
 result=$(make_api_call "POST" "/auth/register" '{
-    "email": "test-'$timestamp'@example.com",
+    "email": "'$TEST_EMAIL'",
     "password": "password123",
     "name": "Test Therapist",
     "specialization": "Massage Therapy",
@@ -46,7 +47,7 @@ fi
 # Test 3: Login with valid credentials
 echo "Testing login with valid credentials..."
 result=$(make_api_call "POST" "/auth/login" '{
-    "email": "test@example.com",
+    "email": "'$TEST_EMAIL'",
     "password": "password123"
 }' "200")
 
@@ -60,7 +61,7 @@ fi
 # Test 4: Login with invalid credentials
 echo "Testing login with invalid credentials..."
 result=$(make_api_call "POST" "/auth/login" '{
-    "email": "test@example.com",
+    "email": "'$TEST_EMAIL'",
     "password": "wrongpassword"
 }' "401")
 

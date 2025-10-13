@@ -55,6 +55,15 @@ A multi-tenant reservation system for health workers like craniosacral therapist
    cp env.example .env.local
    cp frontend/env.example frontend/.env.local
    
+   # Configure SAM environment variables (REQUIRED)
+   cp backend/env.json.example backend/env.json
+   
+   # Update backend/env.json with your real credentials:
+   # - MongoDB Atlas connection string
+   # - JWT secret key
+   # - SMTP settings for email notifications
+   # - Other configuration as needed
+   
    # Update .env.local with your MongoDB Atlas connection string
    # Update other settings as needed
    ```
@@ -66,7 +75,7 @@ A multi-tenant reservation system for health workers like craniosacral therapist
    
    # Start the backend API
    cd backend
-   sam local start-api --port 3001 --host 0.0.0.0
+   sam local start-api --port 3001 --host 0.0.0.0 --env-vars env.json
    
    # In another terminal, start the frontend
    cd frontend
@@ -77,6 +86,15 @@ A multi-tenant reservation system for health workers like craniosacral therapist
    - Frontend: http://localhost:3000
    - API: http://localhost:3001
    - LocalStack: http://localhost:4566
+
+## 🔒 Security Notes
+
+**IMPORTANT**: Never commit files with real credentials to version control:
+
+- ✅ **Safe to commit**: `backend/env.json.example`, `env.example`
+- ❌ **Never commit**: `backend/env.json`, `.env.local`, `.env`
+
+The `backend/env.json` file contains your real MongoDB connection string and other sensitive credentials. It's automatically excluded from git via `.gitignore`.
 
 ## 📋 Manual Setup
 
