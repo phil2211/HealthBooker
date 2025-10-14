@@ -91,6 +91,10 @@ extract_test_counts "$therapist_output"
 booking_output=$(run_test_suite "Booking API Tests" "$SCRIPT_DIR/test-booking.sh")
 extract_test_counts "$booking_output"
 
+# New Endpoints Tests
+new_endpoints_output=$(run_test_suite "New API Endpoints Tests" "$SCRIPT_DIR/test-new-endpoints.sh")
+extract_test_counts "$new_endpoints_output"
+
 # Print final summary
 echo ""
 echo -e "${BLUE}==========================================${NC}"

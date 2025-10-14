@@ -199,6 +199,25 @@ Resources:
               AllowMethods: '''GET,OPTIONS'''
     Metadata:
       SamResourceId: GetBookingsFunction
+  ListTherapistsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ListTherapistsFunction
+      Handler: list-working.handler
+      Events:
+        ListTherapistsApi:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: HealthBookingApi
+            Path: /therapist/list
+            Method: get
+            Cors:
+              AllowOrigin: '''*'''
+              AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              AllowMethods: '''GET,OPTIONS'''
+    Metadata:
+      SamResourceId: ListTherapistsFunction
   CreateBookingFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -237,6 +256,44 @@ Resources:
               AllowMethods: '''DELETE,OPTIONS'''
     Metadata:
       SamResourceId: CancelBookingFunction
+  UpdateBookingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: UpdateBookingFunction
+      Handler: update-working.handler
+      Events:
+        UpdateBookingApi:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: HealthBookingApi
+            Path: /booking/update/{token}
+            Method: put
+            Cors:
+              AllowOrigin: '''*'''
+              AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              AllowMethods: '''PUT,OPTIONS'''
+    Metadata:
+      SamResourceId: UpdateBookingFunction
+  GetBookingDetailsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: GetBookingDetailsFunction
+      Handler: details-working.handler
+      Events:
+        GetBookingDetailsApi:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: HealthBookingApi
+            Path: /booking/details/{token}
+            Method: get
+            Cors:
+              AllowOrigin: '''*'''
+              AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              AllowMethods: '''GET,OPTIONS'''
+    Metadata:
+      SamResourceId: GetBookingDetailsFunction
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:

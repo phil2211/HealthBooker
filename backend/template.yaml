@@ -191,6 +191,23 @@ Resources:
               AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               AllowMethods: "'GET,OPTIONS'"
 
+  ListTherapistsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/therapist/list/
+      Handler: list-working.handler
+      Events:
+        ListTherapistsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HealthBookingApi
+            Path: /therapist/list
+            Method: get
+            Cors:
+              AllowOrigin: "'*'"
+              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              AllowMethods: "'GET,OPTIONS'"
+
   # Booking Functions
   CreateBookingFunction:
     Type: AWS::Serverless::Function
@@ -225,6 +242,40 @@ Resources:
               AllowOrigin: "'*'"
               AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               AllowMethods: "'DELETE,OPTIONS'"
+
+  UpdateBookingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/booking/update/
+      Handler: update-working.handler
+      Events:
+        UpdateBookingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HealthBookingApi
+            Path: /booking/update/{token}
+            Method: put
+            Cors:
+              AllowOrigin: "'*'"
+              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              AllowMethods: "'PUT,OPTIONS'"
+
+  GetBookingDetailsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/booking/details/
+      Handler: details-working.handler
+      Events:
+        GetBookingDetailsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HealthBookingApi
+            Path: /booking/details/{token}
+            Method: get
+            Cors:
+              AllowOrigin: "'*'"
+              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              AllowMethods: "'GET,OPTIONS'"
 
   # S3 Bucket for Frontend
   FrontendBucket:

@@ -153,7 +153,7 @@ const handleCors = (event) => {
   return null;
 };
 
-function generateAvailableSlots(weeklyAvailability, blockedSlots, bookings, startDate, endDate) {
+function generateAllSlots(weeklyAvailability, blockedSlots, bookings, startDate, endDate) {
   const slots = [];
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -164,32 +164,76 @@ function generateAvailableSlots(weeklyAvailability, blockedSlots, bookings, star
 
     // Find weekly availability for this day
     const dayAvailability = weeklyAvailability.find(avail => avail.day === dayOfWeek);
-    if (!dayAvailability) continue;
+    if (!dayAvailability) {
+      // No availability for this day - add unavailable slots
+      slots.push({
+        date: dateStr,
+        startTime: '00:00',
+        endTime: '23:59',
+        status: 'unavailable'
+      });
+      continue;
+    }
 
     // Check if this date is blocked
     const isBlocked = blockedSlots.some(blocked => blocked.date === dateStr);
-    if (isBlocked) continue;
+    if (isBlocked) {
+      // Entire day is blocked
+      slots.push({
+        date: dateStr,
+        startTime: '00:00',
+        endTime: '23:59',
+        status: 'blocked'
+      });
+      continue;
+    }
 
     // Generate time slots for this day
     const startTime = parseTime(dayAvailability.startTime);
     const endTime = parseTime(dayAvailability.endTime);
     const slotDuration = 60; // 60 minutes per slot
+    const breakDuration = 30; // 30 minutes break after each booking
 
     for (let time = startTime; time < endTime; time += slotDuration) {
       const slotStartTime = formatTime(time);
       const slotEndTime = formatTime(time + slotDuration);
 
       // Check if this slot is booked
-      const isBooked = bookings.some(booking => 
-        booking.date === dateStr && 
-        booking.startTime === slotStartTime
+      const booking = bookings.find(b => 
+        b.date === dateStr && 
+        b.startTime === slotStartTime
       );
 
-      if (!isBooked) {
+      if (booking) {
+        // Add booked slot
         slots.push({
           date: dateStr,
           startTime: slotStartTime,
-          endTime: slotEndTime
+          endTime: slotEndTime,
+          status: 'booked',
+          bookingId: booking._id,
+          patientName: booking.patientName
+        });
+
+        // Add break slot after booking (if there's time)
+        const breakStartTime = time + slotDuration;
+        const breakEndTime = breakStartTime + breakDuration;
+        
+        if (breakEndTime <= endTime) {
+          slots.push({
+            date: dateStr,
+            startTime: formatTime(breakStartTime),
+            endTime: formatTime(breakEndTime),
+            status: 'break'
+          });
+        }
+      } else {
+        // Add available slot
+        slots.push({
+          date: dateStr,
+          startTime: slotStartTime,
+          endTime: slotEndTime,
+          status: 'available'
         });
       }
     }
@@ -229,7 +273,13 @@ exports.handler = async (event) => {
       return createErrorResponse(400, 'startDate and endDate are required');
     }
 
-    const therapist = await Therapist.findById(therapistId);
+    let therapist;
+    try {
+      therapist = await Therapist.findById(therapistId);
+    } catch (error) {
+      return createErrorResponse(404, 'Therapist not found');
+    }
+    
     if (!therapist) {
       return createErrorResponse(404, 'Therapist not found');
     }
@@ -241,8 +291,8 @@ exports.handler = async (event) => {
       status: { $ne: 'cancelled' }
     });
 
-    // Generate available time slots
-    const availableSlots = generateAvailableSlots(
+    // Generate all time slots (available, booked, break, unavailable)
+    const allSlots = generateAllSlots(
       therapist.weeklyAvailability,
       therapist.blockedSlots,
       bookings,
@@ -251,7 +301,7 @@ exports.handler = async (event) => {
     );
 
     return createResponse(200, {
-      availableSlots
+      slots: allSlots
     });
 
   } catch (error) {

@@ -185,7 +185,13 @@ exports.handler = async (event) => {
     }
 
     // Check if therapist exists
-    const therapist = await Therapist.findById(therapistId);
+    let therapist;
+    try {
+      therapist = await Therapist.findById(therapistId);
+    } catch (error) {
+      return createErrorResponse(404, 'Therapist not found');
+    }
+    
     if (!therapist) {
       return createErrorResponse(404, 'Therapist not found');
     }

@@ -60,7 +60,7 @@ const LandingPage: React.FC = () => {
                 <Button
                   variant="outlined"
                   fullWidth
-                  disabled
+                  onClick={() => navigate('/therapists')}
                 >
                   Book Appointment
                 </Button>

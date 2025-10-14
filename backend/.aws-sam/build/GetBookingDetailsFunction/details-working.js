@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 
 // Simple MongoDB connection
@@ -55,6 +54,10 @@ const therapistSchema = new mongoose.Schema({
   bio: {
     type: String,
     required: true,
+    trim: true
+  },
+  photoUrl: {
+    type: String,
     trim: true
   },
   weeklyAvailability: [{
@@ -139,12 +142,8 @@ const createResponse = (statusCode, body, headers = {}) => ({
 const createErrorResponse = (statusCode, message) => 
   createResponse(statusCode, { error: message });
 
-const parseBody = (event) => {
-  try {
-    return event.body ? JSON.parse(event.body) : {};
-  } catch (error) {
-    throw new Error('Invalid JSON in request body');
-  }
+const getPathParameter = (event, param) => {
+  return event.pathParameters ? event.pathParameters[param] : undefined;
 };
 
 const handleCors = (event) => {
@@ -162,102 +161,49 @@ exports.handler = async (event) => {
   try {
     await connectToDatabase();
     
-    const body = parseBody(event);
-    const { 
-      therapistId, 
-      patientName, 
-      patientEmail, 
-      patientPhone, 
-      date, 
-      startTime, 
-      endTime 
-    } = body;
-
-    // Validate required fields
-    if (!therapistId || !patientName || !patientEmail || !patientPhone || !date || !startTime || !endTime) {
-      return createErrorResponse(400, 'All fields are required');
+    const cancellationToken = getPathParameter(event, 'token');
+    if (!cancellationToken) {
+      return createErrorResponse(400, 'Cancellation token is required');
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(patientEmail)) {
-      return createErrorResponse(400, 'Invalid email format');
+    // Find booking by cancellation token
+    const booking = await Booking.findOne({ cancellationToken });
+    if (!booking) {
+      return createErrorResponse(404, 'Booking not found');
     }
 
-    // Check if therapist exists
-    let therapist;
-    try {
-      therapist = await Therapist.findById(therapistId);
-    } catch (error) {
-      return createErrorResponse(404, 'Therapist not found');
-    }
-    
+    // Get therapist info
+    const therapist = await Therapist.findById(booking.therapistId);
     if (!therapist) {
       return createErrorResponse(404, 'Therapist not found');
     }
 
-    // Check if slot is available
-    const existingBooking = await Booking.findOne({
-      therapistId,
-      date,
-      startTime,
-      status: { $ne: 'cancelled' }
-    });
-
-    if (existingBooking) {
-      return createErrorResponse(409, 'This time slot is already booked');
-    }
-
-    // Validate date is not in the past
-    const bookingDate = new Date(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (bookingDate < today) {
-      return createErrorResponse(400, 'Cannot book appointments in the past');
-    }
-
-    // Generate cancellation token
-    const cancellationToken = uuidv4();
-
-    // Create booking
-    const booking = new Booking({
-      therapistId,
-      patientName,
-      patientEmail,
-      patientPhone,
-      date,
-      startTime,
-      endTime,
-      status: 'confirmed',
-      cancellationToken
-    });
-
-    await booking.save();
-
-    // Note: Email sending would be implemented here in production
-    // For now, we'll just log the booking
-    console.log('Booking created:', {
-      bookingId: booking._id,
-      therapistEmail: therapist.email,
-      patientEmail: patientEmail,
-      cancellationToken: cancellationToken
-    });
-
-    return createResponse(201, {
-      message: 'Booking created successfully',
+    return createResponse(200, {
       booking: {
         id: booking._id,
-        cancellationToken: booking.cancellationToken,
+        therapistId: booking.therapistId,
+        patientName: booking.patientName,
+        patientEmail: booking.patientEmail,
+        patientPhone: booking.patientPhone,
         date: booking.date,
         startTime: booking.startTime,
         endTime: booking.endTime,
-        status: booking.status
+        status: booking.status,
+        cancellationToken: booking.cancellationToken,
+        createdAt: booking.createdAt,
+        updatedAt: booking.updatedAt
+      },
+      therapist: {
+        id: therapist._id,
+        name: therapist.name,
+        specialization: therapist.specialization,
+        bio: therapist.bio,
+        photoUrl: therapist.photoUrl
       }
     });
 
   } catch (error) {
-    console.error('Create booking error:', error);
+    console.error('Get booking details error:', error);
     return createErrorResponse(500, 'Internal server error');
   }
 };

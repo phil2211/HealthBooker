@@ -6,7 +6,6 @@ import {
   Box,
   Card,
   CardContent,
-  Grid,
   Button,
   Alert,
   CircularProgress,
@@ -14,17 +13,11 @@ import {
   Step,
   StepLabel,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
+  Grid,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { apiService } from '../services/api';
 import Header from '../components/Header';
+import WeeklyCalendar from '../components/WeeklyCalendar';
 
 interface Therapist {
   id: string;
@@ -37,13 +30,15 @@ interface TimeSlot {
   date: string;
   startTime: string;
   endTime: string;
+  status: 'available' | 'booked' | 'break' | 'unavailable' | 'blocked';
+  bookingId?: string;
+  patientName?: string;
 }
 
 const BookingPage: React.FC = () => {
   const { therapistId } = useParams<{ therapistId: string }>();
   const [therapist, setTherapist] = useState<Therapist | null>(null);
-  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [loading, setLoading] = useState(true);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -60,6 +55,7 @@ const BookingPage: React.FC = () => {
   useEffect(() => {
     if (therapistId) {
       fetchTherapistProfile();
+      fetchAvailability();
     }
   }, [therapistId]);
 
@@ -77,28 +73,21 @@ const BookingPage: React.FC = () => {
     }
   };
 
-  const fetchAvailableSlots = async (date: Date) => {
+  const fetchAvailability = async () => {
     if (!therapistId) return;
 
     try {
       setSlotsLoading(true);
-      const startDate = date.toISOString().split('T')[0];
-      const endDate = new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const today = new Date();
+      const startDate = today.toISOString().split('T')[0];
+      const endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       
       const response = await apiService.getTherapistAvailability(therapistId, startDate, endDate);
-      setAvailableSlots(response.availableSlots);
+      setSlots(response.slots);
     } catch (err: any) {
-      setError('Failed to fetch available slots');
+      setError('Failed to fetch availability');
     } finally {
       setSlotsLoading(false);
-    }
-  };
-
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-    setSelectedSlot(null);
-    if (date) {
-      fetchAvailableSlots(date);
     }
   };
 
@@ -138,12 +127,6 @@ const BookingPage: React.FC = () => {
     } finally {
       setBookingLoading(false);
     }
-  };
-
-  const getSlotsForSelectedDate = () => {
-    if (!selectedDate) return [];
-    const dateStr = selectedDate.toISOString().split('T')[0];
-    return availableSlots.filter(slot => slot.date === dateStr);
   };
 
   const steps = ['Select Date & Time', 'Enter Details', 'Confirmation'];
@@ -225,48 +208,16 @@ const BookingPage: React.FC = () => {
                   Select Date & Time
                 </Typography>
                 
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DatePicker
-                    label="Select Date"
-                    value={selectedDate}
-                    onChange={handleDateChange}
-                    minDate={new Date()}
-                    sx={{ mb: 3 }}
-                  />
-                </LocalizationProvider>
-
-                {selectedDate && (
-                  <Box>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Available Times for {selectedDate.toLocaleDateString()}
-                    </Typography>
-                    
-                    {slotsLoading ? (
-                      <Box display="flex" justifyContent="center" p={2}>
-                        <CircularProgress />
-                      </Box>
-                    ) : (
-                      <Grid container spacing={2}>
-                        {getSlotsForSelectedDate().map((slot, index) => (
-                          <Grid item xs={6} sm={4} md={3} key={index}>
-                            <Button
-                              variant={selectedSlot?.startTime === slot.startTime ? 'contained' : 'outlined'}
-                              fullWidth
-                              onClick={() => handleSlotSelect(slot)}
-                            >
-                              {slot.startTime}
-                            </Button>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    )}
-
-                    {getSlotsForSelectedDate().length === 0 && !slotsLoading && (
-                      <Typography variant="body2" color="text.secondary">
-                        No available slots for this date. Please select another date.
-                      </Typography>
-                    )}
+                {slotsLoading ? (
+                  <Box display="flex" justifyContent="center" p={4}>
+                    <CircularProgress />
                   </Box>
+                ) : (
+                  <WeeklyCalendar
+                    slots={slots}
+                    onSlotSelect={handleSlotSelect}
+                    selectedSlot={selectedSlot}
+                  />
                 )}
               </Box>
             )}
@@ -353,14 +304,22 @@ const BookingPage: React.FC = () => {
                   Booking Confirmed!
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  You will receive a confirmation email with your appointment details and cancellation link.
+                  Your appointment has been successfully booked.
                 </Typography>
-                <Button
-                  variant="contained"
-                  onClick={() => window.location.href = '/'}
-                >
-                  Return to Home
-                </Button>
+                {success && (
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    {success}
+                  </Alert>
+                )}
+                <Box sx={{ mt: 3 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => window.location.href = '/'}
+                    sx={{ mr: 2 }}
+                  >
+                    Return to Home
+                  </Button>
+                </Box>
               </Box>
             )}
           </CardContent>

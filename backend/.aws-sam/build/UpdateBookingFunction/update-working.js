@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 
 // Simple MongoDB connection
@@ -28,48 +27,6 @@ const connectToDatabase = async () => {
     throw error;
   }
 };
-
-// Simple Therapist schema
-const therapistSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  passwordHash: {
-    type: String,
-    required: true
-  },
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  specialization: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  bio: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  weeklyAvailability: [{
-    day: Number,
-    startTime: String,
-    endTime: String
-  }],
-  blockedSlots: [{
-    date: String,
-    startTime: String,
-    endTime: String
-  }]
-}, {
-  timestamps: true
-});
 
 // Simple Booking schema
 const bookingSchema = new mongoose.Schema({
@@ -120,7 +77,6 @@ const bookingSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const Therapist = mongoose.model('Therapist', therapistSchema);
 const Booking = mongoose.model('Booking', bookingSchema);
 
 // Helper functions
@@ -139,9 +95,13 @@ const createResponse = (statusCode, body, headers = {}) => ({
 const createErrorResponse = (statusCode, message) => 
   createResponse(statusCode, { error: message });
 
+const getPathParameter = (event, param) => {
+  return event.pathParameters ? event.pathParameters[param] : undefined;
+};
+
 const parseBody = (event) => {
   try {
-    return event.body ? JSON.parse(event.body) : {};
+    return JSON.parse(event.body || '{}');
   } catch (error) {
     throw new Error('Invalid JSON in request body');
   }
@@ -162,90 +122,60 @@ exports.handler = async (event) => {
   try {
     await connectToDatabase();
     
+    const cancellationToken = getPathParameter(event, 'token');
+    if (!cancellationToken) {
+      return createErrorResponse(400, 'Cancellation token is required');
+    }
+
     const body = parseBody(event);
-    const { 
-      therapistId, 
-      patientName, 
-      patientEmail, 
-      patientPhone, 
-      date, 
-      startTime, 
-      endTime 
-    } = body;
+    const { date, startTime, endTime } = body;
 
     // Validate required fields
-    if (!therapistId || !patientName || !patientEmail || !patientPhone || !date || !startTime || !endTime) {
-      return createErrorResponse(400, 'All fields are required');
+    if (!date || !startTime || !endTime) {
+      return createErrorResponse(400, 'date, startTime, and endTime are required');
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(patientEmail)) {
-      return createErrorResponse(400, 'Invalid email format');
+    // Find booking by cancellation token
+    const booking = await Booking.findOne({ cancellationToken });
+    if (!booking) {
+      return createErrorResponse(404, 'Booking not found');
     }
 
-    // Check if therapist exists
-    let therapist;
-    try {
-      therapist = await Therapist.findById(therapistId);
-    } catch (error) {
-      return createErrorResponse(404, 'Therapist not found');
+    // Check if booking is already cancelled
+    if (booking.status === 'cancelled') {
+      return createErrorResponse(400, 'Cannot update a cancelled booking');
     }
+
+    // Validate new date is not in the past
+    const newBookingDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    if (!therapist) {
-      return createErrorResponse(404, 'Therapist not found');
+    if (newBookingDate < today) {
+      return createErrorResponse(400, 'Cannot reschedule to a date in the past');
     }
 
-    // Check if slot is available
+    // Check if new slot is available
     const existingBooking = await Booking.findOne({
-      therapistId,
+      therapistId: booking.therapistId,
       date,
       startTime,
-      status: { $ne: 'cancelled' }
+      status: { $ne: 'cancelled' },
+      _id: { $ne: booking._id } // Exclude current booking
     });
 
     if (existingBooking) {
       return createErrorResponse(409, 'This time slot is already booked');
     }
 
-    // Validate date is not in the past
-    const bookingDate = new Date(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (bookingDate < today) {
-      return createErrorResponse(400, 'Cannot book appointments in the past');
-    }
-
-    // Generate cancellation token
-    const cancellationToken = uuidv4();
-
-    // Create booking
-    const booking = new Booking({
-      therapistId,
-      patientName,
-      patientEmail,
-      patientPhone,
-      date,
-      startTime,
-      endTime,
-      status: 'confirmed',
-      cancellationToken
-    });
-
+    // Update booking
+    booking.date = date;
+    booking.startTime = startTime;
+    booking.endTime = endTime;
     await booking.save();
 
-    // Note: Email sending would be implemented here in production
-    // For now, we'll just log the booking
-    console.log('Booking created:', {
-      bookingId: booking._id,
-      therapistEmail: therapist.email,
-      patientEmail: patientEmail,
-      cancellationToken: cancellationToken
-    });
-
-    return createResponse(201, {
-      message: 'Booking created successfully',
+    return createResponse(200, {
+      message: 'Booking updated successfully',
       booking: {
         id: booking._id,
         cancellationToken: booking.cancellationToken,
@@ -257,7 +187,7 @@ exports.handler = async (event) => {
     });
 
   } catch (error) {
-    console.error('Create booking error:', error);
+    console.error('Update booking error:', error);
     return createErrorResponse(500, 'Internal server error');
   }
 };

@@ -65,6 +65,11 @@ class ApiService {
     return response.data;
   }
 
+  async listTherapists() {
+    const response: AxiosResponse = await this.api.get('/therapist/list');
+    return response.data;
+  }
+
   async updateAvailability(weeklyAvailability: any[], blockedSlots: any[]) {
     const response: AxiosResponse = await this.api.put('/therapist/availability', {
       weeklyAvailability,
@@ -99,6 +104,20 @@ class ApiService {
 
   async cancelBooking(cancellationToken: string) {
     const response: AxiosResponse = await this.api.delete(`/booking/cancel/${cancellationToken}`);
+    return response.data;
+  }
+
+  async getBookingDetails(cancellationToken: string) {
+    const response: AxiosResponse = await this.api.get(`/booking/details/${cancellationToken}`);
+    return response.data;
+  }
+
+  async updateBooking(cancellationToken: string, date: string, startTime: string, endTime: string) {
+    const response: AxiosResponse = await this.api.put(`/booking/update/${cancellationToken}`, {
+      date,
+      startTime,
+      endTime,
+    });
     return response.data;
   }
 }
