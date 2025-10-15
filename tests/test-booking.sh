@@ -49,11 +49,11 @@ availability_result=$(make_api_call "PUT" "/therapist/availability" '{
         {
             "day": 1,
             "startTime": "09:00",
-            "endTime": "17:00"
+            "endTime": "12:00"
         },
         {
             "day": 2,
-            "startTime": "09:00",
+            "startTime": "14:00",
             "endTime": "17:00"
         },
         {

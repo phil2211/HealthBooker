@@ -127,7 +127,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/therapist/getProfile/
-      Handler: getProfile-working.handler
+      Handler: getProfile.handler
       Events:
         GetProfileApi:
           Type: Api
@@ -144,7 +144,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/therapist/getAvailability/
-      Handler: getAvailability-working.handler
+      Handler: getAvailability.handler
       Events:
         GetAvailabilityApi:
           Type: Api

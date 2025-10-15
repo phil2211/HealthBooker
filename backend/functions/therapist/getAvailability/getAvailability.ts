@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { connectToDatabase, Therapist, Booking } from './layers';
 import { createResponse, createErrorResponse, getPathParameter, getQueryParameter, handleCors } from './layers/utils/apiHelpers';
+import mongoose from 'mongoose';
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -15,6 +16,11 @@ export const handler = async (
     const therapistId = getPathParameter(event, 'id');
     if (!therapistId) {
       return createErrorResponse(400, 'Therapist ID is required');
+    }
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(therapistId)) {
+      return createErrorResponse(404, 'Therapist not found');
     }
 
     const startDate = getQueryParameter(event, 'startDate');
