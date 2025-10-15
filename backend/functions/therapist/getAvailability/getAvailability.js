@@ -53,9 +53,32 @@ function generateAvailableSlots(weeklyAvailability, blockedSlots, bookings, star
     const slots = [];
     const start = new Date(startDate);
     const end = new Date(endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+    
     for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
         const dayOfWeek = date.getDay();
         const dateStr = date.toISOString().split('T')[0];
+        const isPastDate = date < today;
+        
+        // For past dates, only show booked slots, no available slots
+        if (isPastDate) {
+            // Add booked slots for past dates
+            const pastBookings = bookings.filter(booking => booking.date === dateStr);
+            pastBookings.forEach(booking => {
+                slots.push({
+                    date: dateStr,
+                    startTime: booking.startTime,
+                    endTime: booking.endTime,
+                    status: 'booked',
+                    bookingId: booking._id,
+                    sessionStartTime: booking.startTime,
+                    sessionEndTime: booking.endTime
+                });
+            });
+            continue;
+        }
+        
         // Find weekly availability for this day
         const dayAvailability = weeklyAvailability.find(avail => avail.day === dayOfWeek);
         if (!dayAvailability) {
@@ -152,7 +175,6 @@ function generateAvailableSlots(weeklyAvailability, blockedSlots, bookings, star
                     endTime: formatTime(blocked.end),
                     status: 'booked',
                     bookingId: blocked.booking._id,
-                    patientName: blocked.booking.patientName,
                     sessionStartTime: formatTime(blocked.start),
                     sessionEndTime: formatTime(blocked.end)
                 });

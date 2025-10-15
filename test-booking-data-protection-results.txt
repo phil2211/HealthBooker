@@ -1,0 +1,51 @@
+Booking Data Protection Test Results - Wed Oct 15 19:16:50 CEST 2025
+=============================================
+
+Command: curl -s 'http://localhost:3001/therapist/68ef95e9bc148bdc1e20e029/availability?startDate=2024-12-20&endDate=2024-12-25'
+Response received
+{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: curl -s 'http://localhost:3001/therapist/68ef95e9bc148bdc1e20e029/availability?startDate=2024-12-20&endDate=2024-12-25'
+Response received
+{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: echo '{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}'
+Response received
+{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: echo '{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}'
+Response received
+{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: echo '{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}'
+Response received
+{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: echo '{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}'
+Response received
+{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: echo '{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}'
+Response received
+{"slots":[{"date":"2024-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2024-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: curl -s 'http://localhost:3001/therapist/68ef95e9bc148bdc1e20e029/availability?startDate=2023-12-20&endDate=2023-12-25'
+Response received
+{"slots":[{"date":"2023-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2023-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2023-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2023-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2023-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2023-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: curl -s 'http://localhost:3001/therapist/68ef95e9bc148bdc1e20e029/availability?startDate=2025-12-20&endDate=2025-12-25'
+Response received
+{"slots":[{"date":"2025-12-20","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2025-12-21","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2025-12-22","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2025-12-23","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2025-12-24","startTime":"00:00","endTime":"23:59","status":"unavailable"},{"date":"2025-12-25","startTime":"00:00","endTime":"23:59","status":"unavailable"}]}
+
+Command: curl -s 'http://localhost:3001/therapist/invalid-id/availability?startDate=2024-12-20&endDate=2024-12-25'
+Response received
+{"error":"Therapist not found"}
+
+Command: curl -s 'http://localhost:3001/therapist/68ef95e9bc148bdc1e20e029/availability'
+Response received
+{"error":"startDate and endDate are required"}
+
+Test Summary:
+Tests Passed: 13
+Tests Failed: 0
+Test completed at: Wed Oct 15 19:17:44 CEST 2025
