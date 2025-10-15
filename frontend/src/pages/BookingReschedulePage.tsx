@@ -46,6 +46,10 @@ interface TimeSlot {
   status: 'available' | 'booked' | 'break' | 'unavailable' | 'blocked';
   bookingId?: string;
   patientName?: string;
+  sessionStartTime?: string;
+  sessionEndTime?: string;
+  breakStartTime?: string;
+  breakEndTime?: string;
 }
 
 const BookingReschedulePage: React.FC = () => {
@@ -60,6 +64,12 @@ const BookingReschedulePage: React.FC = () => {
   const [rescheduling, setRescheduling] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [currentWeekStart, setCurrentWeekStart] = useState<string>(() => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    return startOfWeek.toISOString().split('T')[0];
+  });
 
   useEffect(() => {
     if (token) {
@@ -83,14 +93,16 @@ const BookingReschedulePage: React.FC = () => {
     }
   };
 
-  const fetchAvailability = async () => {
+  const fetchAvailability = async (weekStart?: string) => {
     if (!booking?.therapistId) return;
 
     try {
       setSlotsLoading(true);
-      const today = new Date();
-      const startDate = today.toISOString().split('T')[0];
-      const endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const startDate = weekStart || currentWeekStart;
+      const startDateObj = new Date(startDate);
+      const endDateObj = new Date(startDateObj);
+      endDateObj.setDate(endDateObj.getDate() + 6);
+      const endDate = endDateObj.toISOString().split('T')[0];
       
       const response = await apiService.getTherapistAvailability(booking.therapistId, startDate, endDate);
       setSlots(response.slots);
@@ -105,12 +117,22 @@ const BookingReschedulePage: React.FC = () => {
     setSelectedSlot(slot);
   };
 
+  const handleWeekChange = (startDate: string) => {
+    setCurrentWeekStart(startDate);
+    fetchAvailability(startDate);
+  };
+
   const handleReschedule = async () => {
     if (!token || !selectedSlot) return;
 
     try {
       setRescheduling(true);
-      await apiService.updateBooking(token, selectedSlot.date, selectedSlot.startTime, selectedSlot.endTime);
+      await apiService.updateBooking(
+        token, 
+        selectedSlot.date, 
+        selectedSlot.sessionStartTime || selectedSlot.startTime, 
+        selectedSlot.sessionEndTime || selectedSlot.endTime
+      );
       setSuccess('Appointment rescheduled successfully!');
       // Navigate back to confirmation page after a short delay
       setTimeout(() => {
@@ -249,6 +271,8 @@ const BookingReschedulePage: React.FC = () => {
                 slots={slots}
                 onSlotSelect={handleSlotSelect}
                 selectedSlot={selectedSlot}
+                onWeekChange={handleWeekChange}
+                currentWeekStart={currentWeekStart}
               />
             )}
           </CardContent>

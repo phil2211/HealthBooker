@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -8,7 +8,17 @@ import {
   CardContent,
   Chip,
   Paper,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+  Stack,
+  Divider,
 } from '@mui/material';
+import {
+  ChevronLeft,
+  ChevronRight,
+  CalendarToday,
+} from '@mui/icons-material';
 
 interface TimeSlot {
   date: string;
@@ -17,19 +27,39 @@ interface TimeSlot {
   status: 'available' | 'booked' | 'break' | 'unavailable' | 'blocked';
   bookingId?: string;
   patientName?: string;
+  sessionStartTime?: string;
+  sessionEndTime?: string;
+  breakStartTime?: string;
+  breakEndTime?: string;
 }
 
 interface WeeklyCalendarProps {
   slots: TimeSlot[];
   onSlotSelect: (slot: TimeSlot) => void;
   selectedSlot?: TimeSlot | null;
+  onWeekChange?: (startDate: string) => void;
+  currentWeekStart?: string;
 }
 
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   slots,
   onSlotSelect,
   selectedSlot,
+  onWeekChange,
+  currentWeekStart,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  
+  const [weekStart, setWeekStart] = useState<string>(() => {
+    if (currentWeekStart) return currentWeekStart;
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    return startOfWeek.toISOString().split('T')[0];
+  });
+
   // Group slots by date
   const slotsByDate = slots.reduce((acc, slot) => {
     if (!acc[slot.date]) {
@@ -51,6 +81,48 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   const allTimeSlots = Array.from(
     new Set(slots.map(slot => `${slot.startTime}-${slot.endTime}`))
   ).sort();
+
+  // Week navigation functions
+  const goToPreviousWeek = () => {
+    const newWeekStart = new Date(weekStart);
+    newWeekStart.setDate(newWeekStart.getDate() - 7);
+    const newWeekStartStr = newWeekStart.toISOString().split('T')[0];
+    setWeekStart(newWeekStartStr);
+    
+    if (onWeekChange) {
+      onWeekChange(newWeekStartStr);
+    }
+  };
+
+  const goToNextWeek = () => {
+    const newWeekStart = new Date(weekStart);
+    newWeekStart.setDate(newWeekStart.getDate() + 7);
+    const newWeekStartStr = newWeekStart.toISOString().split('T')[0];
+    setWeekStart(newWeekStartStr);
+    
+    if (onWeekChange) {
+      onWeekChange(newWeekStartStr);
+    }
+  };
+
+  const goToCurrentWeek = () => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    const weekStartStr = startOfWeek.toISOString().split('T')[0];
+    setWeekStart(weekStartStr);
+    
+    if (onWeekChange) {
+      onWeekChange(weekStartStr);
+    }
+  };
+
+  // Update week start when currentWeekStart prop changes
+  useEffect(() => {
+    if (currentWeekStart && currentWeekStart !== weekStart) {
+      setWeekStart(currentWeekStart);
+    }
+  }, [currentWeekStart]);
 
   const getSlotColor = (status: string) => {
     switch (status) {
@@ -89,14 +161,192 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
+  const formatWeekRange = (weekStartStr: string) => {
+    const startDate = new Date(weekStartStr);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+    
+    const startFormatted = startDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    const endFormatted = endDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    
+    return `${startFormatted} - ${endFormatted}`;
+  };
+
   const isSlotSelected = (slot: TimeSlot) => {
     return selectedSlot && 
            selectedSlot.date === slot.date && 
            selectedSlot.startTime === slot.startTime;
   };
 
-  return (
+  // Mobile layout - stacked cards for each date
+  const renderMobileLayout = () => (
     <Box>
+      {/* Week Navigation */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <IconButton onClick={goToPreviousWeek} size="small">
+              <ChevronLeft />
+            </IconButton>
+            
+            <Box textAlign="center" flex={1}>
+              <Typography variant="h6" gutterBottom>
+                {formatWeekRange(weekStart)}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<CalendarToday />}
+                onClick={goToCurrentWeek}
+              >
+                Today
+              </Button>
+            </Box>
+            
+            <IconButton onClick={goToNextWeek} size="small">
+              <ChevronRight />
+            </IconButton>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Legend */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Typography variant="subtitle2" gutterBottom>
+            Legend
+          </Typography>
+          <Box display="flex" gap={1} flexWrap="wrap">
+            <Chip
+              label="Available"
+              sx={{ backgroundColor: '#4caf50', color: 'white' }}
+              size="small"
+            />
+            <Chip
+              label="Booked"
+              sx={{ backgroundColor: '#ff9800', color: 'white' }}
+              size="small"
+            />
+            <Chip
+              label="Break"
+              sx={{ backgroundColor: '#9e9e9e', color: 'white' }}
+              size="small"
+            />
+            <Chip
+              label="Unavailable"
+              sx={{ backgroundColor: '#757575', color: 'white' }}
+              size="small"
+            />
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Mobile Date Cards */}
+      <Stack spacing={2}>
+        {dates.map((date) => (
+          <Card key={date} variant="outlined">
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                {formatDate(date)}
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              
+              <Grid container spacing={1}>
+                {slotsByDate[date]?.map((slot) => (
+                  <Grid item xs={6} sm={4} key={`${slot.startTime}-${slot.endTime}`}>
+                    <Button
+                      fullWidth
+                      variant={isSlotSelected(slot) ? 'contained' : 'outlined'}
+                      disabled={slot.status !== 'available'}
+                      onClick={() => slot.status === 'available' && onSlotSelect(slot)}
+                      sx={{
+                        backgroundColor: slot.status === 'available' ? getSlotColor(slot.status) : 'transparent',
+                        color: slot.status === 'available' ? getSlotTextColor(slot.status) : 'text.primary',
+                        borderColor: getSlotColor(slot.status),
+                        minHeight: 60,
+                        fontSize: '0.75rem',
+                        textTransform: 'none',
+                        '&:hover': {
+                          backgroundColor: slot.status === 'available' ? getSlotColor(slot.status) : 'transparent',
+                        },
+                        '&:disabled': {
+                          backgroundColor: 'transparent',
+                          color: 'text.secondary',
+                          borderColor: getSlotColor(slot.status),
+                        },
+                      }}
+                    >
+                      <Box textAlign="center">
+                        <Typography variant="caption" display="block" fontWeight="bold">
+                          {slot.sessionStartTime ? formatTime(slot.sessionStartTime) : formatTime(slot.startTime)}
+                        </Typography>
+                        <Typography variant="caption" display="block">
+                          {slot.status === 'booked' ? 'Booked' : 
+                           slot.status === 'break' ? 'Break' :
+                           slot.status === 'unavailable' || slot.status === 'blocked' ? 'Unavailable' :
+                           'Available'}
+                        </Typography>
+                        {slot.patientName && (
+                          <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem' }}>
+                            {slot.patientName}
+                          </Typography>
+                        )}
+                        {slot.status === 'available' && slot.sessionEndTime && (
+                          <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>
+                            Session: {formatTime(slot.sessionStartTime!)}-{formatTime(slot.sessionEndTime)}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
+            </CardContent>
+          </Card>
+        ))}
+      </Stack>
+    </Box>
+  );
+
+  // Desktop layout - traditional grid
+  const renderDesktopLayout = () => (
+    <Box>
+      {/* Week Navigation */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <IconButton onClick={goToPreviousWeek}>
+              <ChevronLeft />
+            </IconButton>
+            
+            <Box textAlign="center" flex={1}>
+              <Typography variant="h6" gutterBottom>
+                {formatWeekRange(weekStart)}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<CalendarToday />}
+                onClick={goToCurrentWeek}
+              >
+                Go to Current Week
+              </Button>
+            </Box>
+            
+            <IconButton onClick={goToNextWeek}>
+              <ChevronRight />
+            </IconButton>
+          </Box>
+        </CardContent>
+      </Card>
+
       {/* Legend */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -130,7 +380,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 
       {/* Calendar Grid */}
       <Paper sx={{ overflow: 'auto' }}>
-        <Box sx={{ minWidth: 800 }}>
+        <Box sx={{ minWidth: isTablet ? 600 : 800 }}>
           {/* Header Row */}
           <Grid container>
             <Grid item xs={2}>
@@ -216,6 +466,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                                 {slot.patientName}
                               </Typography>
                             )}
+                            {slot.status === 'available' && slot.sessionEndTime && (
+                              <Typography variant="caption" display="block" sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>
+                                {formatTime(slot.sessionStartTime!)}-{formatTime(slot.sessionEndTime)}
+                              </Typography>
+                            )}
                           </Box>
                         </Button>
                       </Box>
@@ -229,6 +484,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
       </Paper>
     </Box>
   );
+
+  return isMobile ? renderMobileLayout() : renderDesktopLayout();
 };
 
 export default WeeklyCalendar;

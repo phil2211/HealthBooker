@@ -33,6 +33,10 @@ interface TimeSlot {
   status: 'available' | 'booked' | 'break' | 'unavailable' | 'blocked';
   bookingId?: string;
   patientName?: string;
+  sessionStartTime?: string;
+  sessionEndTime?: string;
+  breakStartTime?: string;
+  breakEndTime?: string;
 }
 
 const BookingPage: React.FC = () => {
@@ -50,6 +54,12 @@ const BookingPage: React.FC = () => {
     patientName: '',
     patientEmail: '',
     patientPhone: '',
+  });
+  const [currentWeekStart, setCurrentWeekStart] = useState<string>(() => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    return startOfWeek.toISOString().split('T')[0];
   });
 
   useEffect(() => {
@@ -73,14 +83,16 @@ const BookingPage: React.FC = () => {
     }
   };
 
-  const fetchAvailability = async () => {
+  const fetchAvailability = async (weekStart?: string) => {
     if (!therapistId) return;
 
     try {
       setSlotsLoading(true);
-      const today = new Date();
-      const startDate = today.toISOString().split('T')[0];
-      const endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const startDate = weekStart || currentWeekStart;
+      const startDateObj = new Date(startDate);
+      const endDateObj = new Date(startDateObj);
+      endDateObj.setDate(endDateObj.getDate() + 6);
+      const endDate = endDateObj.toISOString().split('T')[0];
       
       const response = await apiService.getTherapistAvailability(therapistId, startDate, endDate);
       setSlots(response.slots);
@@ -94,6 +106,11 @@ const BookingPage: React.FC = () => {
   const handleSlotSelect = (slot: TimeSlot) => {
     setSelectedSlot(slot);
     setActiveStep(1);
+  };
+
+  const handleWeekChange = (startDate: string) => {
+    setCurrentWeekStart(startDate);
+    fetchAvailability(startDate);
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,8 +133,8 @@ const BookingPage: React.FC = () => {
         patientEmail: formData.patientEmail,
         patientPhone: formData.patientPhone,
         date: selectedSlot.date,
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime,
+        startTime: selectedSlot.sessionStartTime || selectedSlot.startTime,
+        endTime: selectedSlot.sessionEndTime || selectedSlot.endTime,
       });
 
       setSuccess('Booking confirmed! You will receive a confirmation email shortly.');
@@ -217,6 +234,8 @@ const BookingPage: React.FC = () => {
                     slots={slots}
                     onSlotSelect={handleSlotSelect}
                     selectedSlot={selectedSlot}
+                    onWeekChange={handleWeekChange}
+                    currentWeekStart={currentWeekStart}
                   />
                 )}
               </Box>
