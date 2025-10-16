@@ -83,10 +83,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /auth/register
             Method: post
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'POST,OPTIONS'"
 
   LoginFunction:
     Type: AWS::Serverless::Function
@@ -100,10 +96,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /auth/login
             Method: post
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'POST,OPTIONS'"
 
   VerifyFunction:
     Type: AWS::Serverless::Function
@@ -117,10 +109,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /auth/verify
             Method: get
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'GET,OPTIONS'"
 
   # Therapist Functions
   GetProfileFunction:
@@ -135,10 +123,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /therapist/{id}/profile
             Method: get
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'GET,OPTIONS'"
 
   GetAvailabilityFunction:
     Type: AWS::Serverless::Function
@@ -152,10 +136,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /therapist/{id}/availability
             Method: get
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'GET,OPTIONS'"
 
   UpdateAvailabilityFunction:
     Type: AWS::Serverless::Function
@@ -169,10 +149,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /therapist/availability
             Method: put
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'PUT,OPTIONS'"
 
   GetBookingsFunction:
     Type: AWS::Serverless::Function
@@ -186,10 +162,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /therapist/bookings
             Method: get
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'GET,OPTIONS'"
 
   ListTherapistsFunction:
     Type: AWS::Serverless::Function
@@ -203,10 +175,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /therapist/list
             Method: get
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'GET,OPTIONS'"
 
   # Booking Functions
   CreateBookingFunction:
@@ -221,10 +189,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /booking/create
             Method: post
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'POST,OPTIONS'"
 
   CancelBookingFunction:
     Type: AWS::Serverless::Function
@@ -238,10 +202,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /booking/cancel/{token}
             Method: delete
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'DELETE,OPTIONS'"
 
   UpdateBookingFunction:
     Type: AWS::Serverless::Function
@@ -255,10 +215,6 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /booking/update/{token}
             Method: put
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'PUT,OPTIONS'"
 
   GetBookingDetailsFunction:
     Type: AWS::Serverless::Function
@@ -272,16 +228,12 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /booking/details/{token}
             Method: get
-            Cors:
-              AllowOrigin: "'*'"
-              AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              AllowMethods: "'GET,OPTIONS'"
 
   # S3 Bucket for Frontend
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub '${AWS::StackName}-frontend-${AWS::AccountId}'
+      BucketName: !Sub 'healthbooker-frontend-${AWS::AccountId}'
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
@@ -300,7 +252,7 @@ Resources:
           - Effect: Allow
             Principal: '*'
             Action: 's3:GetObject'
-            Resource: !Sub '${FrontendBucket}/*'
+            Resource: !Sub 'arn:aws:s3:::${FrontendBucket}/*'
 
 Outputs:
   ApiUrl:

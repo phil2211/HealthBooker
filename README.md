@@ -213,23 +213,42 @@ The application uses LocalStack to simulate AWS services locally:
    ```bash
    cd backend
    sam build
-   sam deploy --guided
+   sam deploy --no-confirm-changeset
+   ```
+   
+   **Note**: The `--no-confirm-changeset` flag automatically deploys without requiring manual confirmation. If you prefer guided deployment, use `sam deploy --guided` instead.
+
+3. **Verify Deployment**
+   ```bash
+   # Check deployment status
+   aws cloudformation describe-stacks --stack-name HealtBooker
+   
+   # Get API endpoint URL
+   aws cloudformation describe-stacks --stack-name HealtBooker --query 'Stacks[0].Outputs[?OutputKey==`ApiUrl`].OutputValue' --output text
    ```
 
-3. **Update Environment Variables**
+4. **Update Environment Variables**
    - Set production MongoDB URI
    - Set production JWT secret
    - Configure email settings
    - Set production base URL
 
-4. **Deploy Frontend**
+5. **Deploy Frontend**
    ```bash
    cd frontend
    npm run build
-   aws s3 sync dist/ s3://your-bucket-name --delete
+   aws s3 sync dist/ s3://healthbooker --delete
    ```
 
-### 3. Environment Variables for Production
+### 3. Deployment Fixes Applied
+
+The following issues have been resolved in the deployment process:
+
+- **CORS Configuration**: Removed individual CORS configurations from API events to prevent conflicts
+- **S3 Bucket Naming**: Fixed bucket name to use lowercase (`healthbooker-frontend-${AWS::AccountId}`)
+- **Template Validation**: All SAM template validation issues resolved
+
+### 4. Environment Variables for Production
 
 Update the SAM template parameters or use AWS Systems Manager:
 
@@ -327,6 +346,12 @@ sam deploy          # Deploy to AWS
    - Verify `VITE_API_URL` in frontend/.env.local
    - Check if backend is running on port 3001
    - Check browser console for CORS errors
+
+5. **AWS Deployment Issues**
+   - **CORS errors**: Ensure CORS is configured only at the API Gateway level, not individual endpoints
+   - **S3 bucket naming**: Bucket names must be lowercase (fixed in template)
+   - **Stack creation failed**: Check CloudFormation events for specific error details
+   - **Permission errors**: Ensure AWS CLI is configured with appropriate permissions
 
 ### Logs
 

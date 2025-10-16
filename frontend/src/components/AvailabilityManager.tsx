@@ -13,7 +13,6 @@ import {
   Select,
   MenuItem,
   TextField,
-  Chip,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { apiService } from '../services/api';

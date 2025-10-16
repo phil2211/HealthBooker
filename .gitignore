@@ -2,3 +2,4 @@
 .env
 env.json
 node_modules
+backend/samconfig.toml
