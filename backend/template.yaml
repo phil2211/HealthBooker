@@ -5,7 +5,7 @@ Description: Health Worker Booking System - Multi-tenant reservation system
 Globals:
   Function:
     Timeout: 30
-    Runtime: nodejs18.x
+    Runtime: nodejs20.x
     Environment:
       Variables:
         MONGODB_URI: !Ref MongoDBUri
