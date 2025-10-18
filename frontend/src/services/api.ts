@@ -78,6 +78,11 @@ class ApiService {
     return response.data;
   }
 
+  async getCurrentAvailability() {
+    const response: AxiosResponse = await this.api.get('/therapist/availability');
+    return response.data;
+  }
+
   async getBookings(status?: string, limit?: number, offset?: number) {
     const params = new URLSearchParams();
     if (status) params.append('status', status);

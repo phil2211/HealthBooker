@@ -22,6 +22,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { apiService } from '../services/api';
 import Header from '../components/Header';
 import AvailabilityManager from '../components/AvailabilityManager';
+import CurrentAvailability from '../components/CurrentAvailability';
 
 interface Booking {
   id: string;
@@ -159,6 +160,11 @@ const TherapistDashboard: React.FC = () => {
                 </Box>
               </CardContent>
             </Card>
+          </Grid>
+
+          {/* Current Availability */}
+          <Grid item xs={12}>
+            <CurrentAvailability />
           </Grid>
 
           {/* Availability Manager */}

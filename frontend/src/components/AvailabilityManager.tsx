@@ -47,11 +47,25 @@ const AvailabilityManager: React.FC = () => {
 
   useEffect(() => {
     if (therapist) {
-      // Initialize with empty availability if none exists
-      setWeeklyAvailability([]);
-      setBlockedSlots([]);
+      loadCurrentAvailability();
     }
   }, [therapist]);
+
+  const loadCurrentAvailability = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getCurrentAvailability();
+      setWeeklyAvailability(response.weeklyAvailability || []);
+      setBlockedSlots(response.blockedSlots || []);
+    } catch (err: any) {
+      console.error('Failed to load availability:', err);
+      // Initialize with empty arrays if loading fails
+      setWeeklyAvailability([]);
+      setBlockedSlots([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addWeeklySlot = () => {
     setWeeklyAvailability([...weeklyAvailability, { day: 1, startTime: '09:00', endTime: '17:00' }]);

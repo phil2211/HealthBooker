@@ -149,6 +149,12 @@ Resources:
             RestApiId: !Ref HealthBookingApi
             Path: /therapist/availability
             Method: put
+        GetAvailabilityApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HealthBookingApi
+            Path: /therapist/availability
+            Method: get
 
   GetBookingsFunction:
     Type: AWS::Serverless::Function

@@ -154,6 +154,13 @@ Resources:
               Ref: HealthBookingApi
             Path: /therapist/availability
             Method: put
+        GetAvailabilityApi:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: HealthBookingApi
+            Path: /therapist/availability
+            Method: get
     Metadata:
       SamResourceId: UpdateAvailabilityFunction
   GetBookingsFunction:

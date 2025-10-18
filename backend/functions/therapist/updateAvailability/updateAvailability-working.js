@@ -144,28 +144,41 @@ exports.handler = async (event) => {
       return createErrorResponse(404, 'Therapist not found');
     }
 
-    const body = parseBody(event);
-    const { weeklyAvailability, blockedSlots } = body;
-
-    // Update availability
-    if (weeklyAvailability) {
-      therapist.weeklyAvailability = weeklyAvailability;
+    // Handle GET request - return current availability settings
+    if (event.httpMethod === 'GET') {
+      return createResponse(200, {
+        weeklyAvailability: therapist.weeklyAvailability || [],
+        blockedSlots: therapist.blockedSlots || []
+      });
     }
 
-    if (blockedSlots) {
-      therapist.blockedSlots = blockedSlots;
+    // Handle PUT request - update availability
+    if (event.httpMethod === 'PUT') {
+      const body = parseBody(event);
+      const { weeklyAvailability, blockedSlots } = body;
+
+      // Update availability
+      if (weeklyAvailability) {
+        therapist.weeklyAvailability = weeklyAvailability;
+      }
+
+      if (blockedSlots) {
+        therapist.blockedSlots = blockedSlots;
+      }
+
+      await therapist.save();
+
+      return createResponse(200, {
+        message: 'Availability updated successfully',
+        weeklyAvailability: therapist.weeklyAvailability,
+        blockedSlots: therapist.blockedSlots
+      });
     }
 
-    await therapist.save();
-
-    return createResponse(200, {
-      message: 'Availability updated successfully',
-      weeklyAvailability: therapist.weeklyAvailability,
-      blockedSlots: therapist.blockedSlots
-    });
+    return createErrorResponse(405, 'Method not allowed');
 
   } catch (error) {
-    console.error('Update availability error:', error);
+    console.error('Availability error:', error);
     return createErrorResponse(500, 'Internal server error');
   }
 };
