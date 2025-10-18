@@ -124,7 +124,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
     }
   }, [currentWeekStart]);
 
-  const getSlotColor = (status: string) => {
+  const getSlotColor = (status: string, isPast: boolean = false) => {
+    if (isPast) {
+      return '#bdbdbd'; // Light gray for past slots
+    }
+    
     switch (status) {
       case 'available':
         return '#4caf50'; // Green
@@ -183,6 +187,19 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
     return selectedSlot && 
            selectedSlot.date === slot.date && 
            selectedSlot.startTime === slot.startTime;
+  };
+
+  const isSlotInPast = (slot: TimeSlot) => {
+    const slotDate = new Date(slot.date);
+    const slotDateTime = new Date(slotDate);
+    
+    // Parse the start time
+    const [hours, minutes] = slot.startTime.split(':');
+    slotDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    
+    const now = new Date();
+    
+    return slotDateTime < now;
   };
 
   // Mobile layout - stacked cards for each date
@@ -244,6 +261,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               sx={{ backgroundColor: '#757575', color: 'white' }}
               size="small"
             />
+            <Chip
+              label="Past"
+              sx={{ backgroundColor: '#bdbdbd', color: 'black' }}
+              size="small"
+            />
           </Box>
         </CardContent>
       </Card>
@@ -264,22 +286,22 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                     <Button
                       fullWidth
                       variant={isSlotSelected(slot) ? 'contained' : 'outlined'}
-                      disabled={slot.status !== 'available'}
-                      onClick={() => slot.status === 'available' && onSlotSelect(slot)}
+                      disabled={slot.status !== 'available' || isSlotInPast(slot)}
+                      onClick={() => slot.status === 'available' && !isSlotInPast(slot) && onSlotSelect(slot)}
                       sx={{
-                        backgroundColor: slot.status === 'available' ? getSlotColor(slot.status) : 'transparent',
-                        color: slot.status === 'available' ? getSlotTextColor(slot.status) : 'text.primary',
-                        borderColor: getSlotColor(slot.status),
+                        backgroundColor: slot.status === 'available' && !isSlotInPast(slot) ? getSlotColor(slot.status) : 'transparent',
+                        color: slot.status === 'available' && !isSlotInPast(slot) ? getSlotTextColor(slot.status) : 'text.primary',
+                        borderColor: getSlotColor(slot.status, isSlotInPast(slot)),
                         minHeight: 60,
                         fontSize: '0.75rem',
                         textTransform: 'none',
                         '&:hover': {
-                          backgroundColor: slot.status === 'available' ? getSlotColor(slot.status) : 'transparent',
+                          backgroundColor: slot.status === 'available' && !isSlotInPast(slot) ? getSlotColor(slot.status) : 'transparent',
                         },
                         '&:disabled': {
                           backgroundColor: 'transparent',
                           color: 'text.secondary',
-                          borderColor: getSlotColor(slot.status),
+                          borderColor: getSlotColor(slot.status, isSlotInPast(slot)),
                         },
                       }}
                     >
@@ -288,7 +310,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                           {slot.sessionStartTime ? formatTime(slot.sessionStartTime) : formatTime(slot.startTime)}
                         </Typography>
                         <Typography variant="caption" display="block">
-                          {slot.status === 'booked' ? 'Booked' : 
+                          {isSlotInPast(slot) ? 'Past' :
+                           slot.status === 'booked' ? 'Booked' : 
                            slot.status === 'break' ? 'Break' :
                            slot.status === 'unavailable' || slot.status === 'blocked' ? 'Unavailable' :
                            'Available'}
@@ -374,6 +397,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               sx={{ backgroundColor: '#757575', color: 'white' }}
               size="small"
             />
+            <Chip
+              label="Past"
+              sx={{ backgroundColor: '#bdbdbd', color: 'black' }}
+              size="small"
+            />
           </Box>
         </CardContent>
       </Card>
@@ -435,28 +463,29 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                         <Button
                           fullWidth
                           variant={isSlotSelected(slot) ? 'contained' : 'outlined'}
-                          disabled={slot.status !== 'available'}
-                          onClick={() => slot.status === 'available' && onSlotSelect(slot)}
+                          disabled={slot.status !== 'available' || isSlotInPast(slot)}
+                          onClick={() => slot.status === 'available' && !isSlotInPast(slot) && onSlotSelect(slot)}
                           sx={{
-                            backgroundColor: slot.status === 'available' ? getSlotColor(slot.status) : 'transparent',
-                            color: slot.status === 'available' ? getSlotTextColor(slot.status) : 'text.primary',
-                            borderColor: getSlotColor(slot.status),
+                            backgroundColor: slot.status === 'available' && !isSlotInPast(slot) ? getSlotColor(slot.status) : 'transparent',
+                            color: slot.status === 'available' && !isSlotInPast(slot) ? getSlotTextColor(slot.status) : 'text.primary',
+                            borderColor: getSlotColor(slot.status, isSlotInPast(slot)),
                             minHeight: 50,
                             fontSize: '0.75rem',
                             textTransform: 'none',
                             '&:hover': {
-                              backgroundColor: slot.status === 'available' ? getSlotColor(slot.status) : 'transparent',
+                              backgroundColor: slot.status === 'available' && !isSlotInPast(slot) ? getSlotColor(slot.status) : 'transparent',
                             },
                             '&:disabled': {
                               backgroundColor: 'transparent',
                               color: 'text.secondary',
-                              borderColor: getSlotColor(slot.status),
+                              borderColor: getSlotColor(slot.status, isSlotInPast(slot)),
                             },
                           }}
                         >
                           <Box textAlign="center">
                             <Typography variant="caption" display="block">
-                              {slot.status === 'booked' ? 'Booked' : 
+                              {isSlotInPast(slot) ? 'Past' :
+                               slot.status === 'booked' ? 'Booked' : 
                                slot.status === 'break' ? 'Break' :
                                slot.status === 'unavailable' || slot.status === 'blocked' ? 'Unavailable' :
                                'Available'}
