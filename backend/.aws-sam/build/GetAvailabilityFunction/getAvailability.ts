@@ -151,9 +151,9 @@ function generateAvailableSlots(
     // Generate 90-minute slots intelligently
     let currentTime = startTime;
     let availableSlotCount = 0;
-    const maxSlotsPerDay = 2; // Limit to 2 slots per day
+    // Remove artificial limit - generate slots for entire available time range
     
-    while (currentTime + slotDuration <= endTime && availableSlotCount < maxSlotsPerDay) {
+    while (currentTime + slotDuration <= endTime) {
       const slotEndTime = currentTime + slotDuration;
       
       // Check if this 90-minute slot conflicts with any booking

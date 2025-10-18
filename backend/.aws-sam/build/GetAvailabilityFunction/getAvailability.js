@@ -127,8 +127,8 @@ function generateAvailableSlots(weeklyAvailability, blockedSlots, bookings, star
         // Generate 90-minute slots intelligently
         let currentTime = startTime;
         let availableSlotCount = 0;
-        const maxSlotsPerDay = 2; // Limit to 2 slots per day
-        while (currentTime + slotDuration <= endTime && availableSlotCount < maxSlotsPerDay) {
+        // Remove artificial limit - generate slots for entire available time range
+        while (currentTime + slotDuration <= endTime) {
             const slotEndTime = currentTime + slotDuration;
             // Check if this 90-minute slot conflicts with any booking
             // A slot conflicts if the SESSION part (first 60 minutes) overlaps with a booking
