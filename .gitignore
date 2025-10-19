@@ -1,5 +1,5 @@
 *.env.local
-.env
+.env.production
 env.json
 node_modules
 backend/samconfig.toml
