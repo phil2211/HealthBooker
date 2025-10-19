@@ -31,12 +31,6 @@ fi
 echo "✅ Node.js version is compatible"
 
 # Create environment files if they don't exist
-if [ ! -f ".env.local" ]; then
-    echo "📝 Creating .env.local file..."
-    cp env.example .env.local
-    echo "⚠️  Please update .env.local with your MongoDB Atlas connection string and other settings"
-fi
-
 if [ ! -f "frontend/.env.local" ]; then
     echo "📝 Creating frontend/.env.local file..."
     cp frontend/.env.example frontend/.env.local
@@ -72,7 +66,7 @@ echo ""
 echo "🎉 Your Health Worker Booking System is ready for local development!"
 echo ""
 echo "📋 Next steps:"
-echo "1. Update .env.local with your MongoDB Atlas connection string"
+echo "1. Update backend/env.json with your MongoDB Atlas connection string"
 echo "2. Update frontend/.env.local if needed"
 echo "3. Start the frontend: cd frontend && npm run dev"
 echo "4. Visit http://localhost:3000 to see the application"

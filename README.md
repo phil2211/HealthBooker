@@ -52,7 +52,6 @@ A multi-tenant reservation system for health workers like craniosacral therapist
 3. **Configure environment variables**
    ```bash
    # Copy and update environment files
-   cp env.example .env.local
    cp frontend/env.example frontend/.env.local
    
    # Configure SAM environment variables (REQUIRED)
@@ -61,11 +60,9 @@ A multi-tenant reservation system for health workers like craniosacral therapist
    # Update backend/env.json with your real credentials:
    # - MongoDB Atlas connection string
    # - JWT secret key
-   # - SMTP settings for email notifications
+   # - AWS region for SES
+   # - Verified FROM_EMAIL address
    # - Other configuration as needed
-   
-   # Update .env.local with your MongoDB Atlas connection string
-   # Update other settings as needed
    ```
 
 4. **Start the application**
@@ -163,8 +160,8 @@ For local development, you can use LocalStack which simulates SES:
 
 **IMPORTANT**: Never commit files with real credentials to version control:
 
-- ✅ **Safe to commit**: `backend/env.json.example`, `env.example`
-- ❌ **Never commit**: `backend/env.json`, `.env.local`, `.env`
+- ✅ **Safe to commit**: `backend/env.json.example`, `frontend/env.example`
+- ❌ **Never commit**: `backend/env.json`, `frontend/.env.local`
 
 The `backend/env.json` file contains your real MongoDB connection string and other sensitive credentials. It's automatically excluded from git via `.gitignore`.
 
@@ -187,14 +184,12 @@ cd backend && npm install && cd ..
 
 ### 2. Configure Environment Variables
 
-Create `.env.local` in the root directory:
-```bash
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/healthbooker
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-AWS_REGION=eu-central-1
-FROM_EMAIL=noreply@yourdomain.com
-BASE_URL=http://localhost:3000
-```
+Configure backend/env.json (see backend/env.json.example for template):
+- Set MongoDB connection string
+- Set JWT secret
+- Set AWS region for SES
+- Set verified FROM_EMAIL address
+- Set BASE_URL
 
 Create `frontend/.env.local`:
 ```bash
