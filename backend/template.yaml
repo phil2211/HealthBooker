@@ -10,10 +10,7 @@ Globals:
       Variables:
         MONGODB_URI: !Ref MongoDBUri
         JWT_SECRET: !Ref JwtSecret
-        SMTP_HOST: !Ref SmtpHost
-        SMTP_PORT: !Ref SmtpPort
-        SMTP_USER: !Ref SmtpUser
-        SMTP_PASS: !Ref SmtpPass
+        AWS_REGION: !Ref AwsRegion
         FROM_EMAIL: !Ref FromEmail
         BASE_URL: !Ref BaseUrl
 
@@ -28,26 +25,10 @@ Parameters:
     Description: JWT secret key for authentication
     Default: your-super-secret-jwt-key-change-this-in-production
   
-  SmtpHost:
+  AwsRegion:
     Type: String
-    Description: SMTP host for email notifications
-    Default: smtp.mailtrap.io
-  
-  SmtpPort:
-    Type: String
-    Description: SMTP port
-    Default: '587'
-  
-  SmtpUser:
-    Type: String
-    Description: SMTP username
-    Default: your-mailtrap-username
-  
-  SmtpPass:
-    Type: String
-    Description: SMTP password
-    NoEcho: true
-    Default: your-mailtrap-password
+    Description: AWS region for SES service
+    Default: eu-central-1
   
   FromEmail:
     Type: String
@@ -188,6 +169,13 @@ Resources:
     Properties:
       CodeUri: functions/booking/create/
       Handler: create-working.handler
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - ses:SendEmail
+              - ses:SendRawEmail
+            Resource: '*'
       Events:
         CreateBookingApi:
           Type: Api
@@ -201,6 +189,13 @@ Resources:
     Properties:
       CodeUri: functions/booking/cancel/
       Handler: cancel-working.handler
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - ses:SendEmail
+              - ses:SendRawEmail
+            Resource: '*'
       Events:
         CancelBookingApi:
           Type: Api

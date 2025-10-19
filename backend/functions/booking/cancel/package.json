@@ -5,7 +5,7 @@
   "main": "cancel.js",
   "dependencies": {
     "aws-sdk": "^2.1490.0",
-    "mongoose": "^8.0.3",
-    "nodemailer": "^6.9.7"
+    "@aws-sdk/client-ses": "^3.450.0",
+    "mongoose": "^8.0.3"
   }
 }

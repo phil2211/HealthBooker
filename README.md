@@ -87,6 +87,78 @@ A multi-tenant reservation system for health workers like craniosacral therapist
    - API: http://localhost:3001
    - LocalStack: http://localhost:4566
 
+## 📧 AWS SES Configuration
+
+The application uses AWS Simple Email Service (SES) for sending confirmation and cancellation emails. You need to configure SES before the application can send emails.
+
+### SES Sandbox Mode (Recommended for Development)
+
+SES starts in sandbox mode, which is perfect for development and testing:
+
+1. **Verify Email Addresses**
+   - Go to AWS SES Console → Verified identities
+   - Click "Create identity" → "Email address"
+   - Enter the email addresses you want to send from/to
+   - Check your email and click the verification link
+   - Repeat for all email addresses you'll use for testing
+
+2. **Sandbox Limitations**
+   - Can only send to verified email addresses
+   - Maximum 200 emails per day
+   - Maximum 1 email per second
+   - Perfect for development and testing
+
+3. **Update Configuration**
+   - Set `FROM_EMAIL` to a verified email address
+   - Ensure all test recipient emails are verified
+
+### SES Production Mode (For Production Deployment)
+
+For production, you'll need to move out of sandbox mode:
+
+1. **Domain Verification**
+   - Go to AWS SES Console → Verified identities
+   - Click "Create identity" → "Domain"
+   - Enter your domain name
+   - Add the required DNS records to your domain's DNS settings
+   - Wait for verification (can take up to 72 hours)
+
+2. **Request Production Access**
+   - Go to AWS SES Console → Account dashboard
+   - Click "Request production access"
+   - Fill out the form explaining your use case
+   - Wait for approval (usually 24-48 hours)
+
+3. **Production Benefits**
+   - Can send to any email address
+   - Higher sending limits (starts at 200/day, can be increased)
+   - Better deliverability
+
+### Local Development with SES
+
+For local development, you can use LocalStack which simulates SES:
+
+1. **LocalStack SES Setup**
+   - LocalStack automatically provides SES simulation
+   - No need to verify emails in LocalStack
+   - Emails are logged to LocalStack logs
+
+2. **View Sent Emails**
+   ```bash
+   # Check LocalStack logs for sent emails
+   docker-compose logs localstack | grep -i ses
+   ```
+
+3. **AWS Credentials for Local Development**
+   - For local development with real SES, configure AWS credentials:
+   ```bash
+   aws configure
+   # Or set environment variables:
+   export AWS_ACCESS_KEY_ID=your-access-key
+   export AWS_SECRET_ACCESS_KEY=your-secret-key
+   export AWS_DEFAULT_REGION=eu-central-1
+   ```
+
 ## 🔒 Security Notes
 
 **IMPORTANT**: Never commit files with real credentials to version control:
@@ -119,11 +191,8 @@ Create `.env.local` in the root directory:
 ```bash
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/healthbooker
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-SMTP_HOST=smtp.mailtrap.io
-SMTP_PORT=587
-SMTP_USER=your-mailtrap-username
-SMTP_PASS=your-mailtrap-password
-FROM_EMAIL=noreply@healthbooker.local
+AWS_REGION=eu-central-1
+FROM_EMAIL=noreply@yourdomain.com
 BASE_URL=http://localhost:3000
 ```
 
@@ -227,13 +296,19 @@ The application uses LocalStack to simulate AWS services locally:
    aws cloudformation describe-stacks --stack-name HealtBooker --query 'Stacks[0].Outputs[?OutputKey==`ApiUrl`].OutputValue' --output text
    ```
 
-4. **Update Environment Variables**
+4. **Configure AWS SES**
+   - Verify your domain or email address in SES Console
+   - Request production access if needed
+   - Set up proper IAM permissions for Lambda functions
+
+5. **Update Environment Variables**
    - Set production MongoDB URI
    - Set production JWT secret
-   - Configure email settings
+   - Set AWS region for SES
+   - Set verified FROM_EMAIL address
    - Set production base URL
 
-5. **Deploy Frontend**
+6. **Deploy Frontend**
    ```bash
    cd frontend
    npm run build
@@ -255,10 +330,7 @@ Update the SAM template parameters or use AWS Systems Manager:
 ```bash
 MONGODB_URI=mongodb+srv://prod-user:password@cluster.mongodb.net/healthbooker
 JWT_SECRET=your-production-jwt-secret
-SMTP_HOST=email-smtp.us-east-1.amazonaws.com
-SMTP_PORT=587
-SMTP_USER=your-ses-username
-SMTP_PASS=your-ses-password
+AWS_REGION=us-east-1
 FROM_EMAIL=noreply@yourdomain.com
 BASE_URL=https://yourdomain.com
 ```
@@ -338,9 +410,13 @@ sam deploy          # Deploy to AWS
    - Ensure database user has proper permissions
 
 3. **Email not sending**
-   - Check SMTP credentials
-   - Verify email service configuration
-   - Check LocalStack logs for SES errors
+   - **Sandbox mode**: Verify all email addresses in SES Console
+   - **Production mode**: Ensure domain is verified and production access is granted
+   - Check IAM permissions for SES (ses:SendEmail, ses:SendRawEmail)
+   - Verify FROM_EMAIL is a verified identity
+   - Check AWS region configuration matches SES region
+   - Check LocalStack logs for SES errors (local development)
+   - Monitor SES sending statistics in AWS Console
 
 4. **Frontend not connecting to API**
    - Verify `VITE_API_URL` in frontend/.env.local

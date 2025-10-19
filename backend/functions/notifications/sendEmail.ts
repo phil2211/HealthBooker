@@ -1,22 +1,13 @@
-import nodemailer from 'nodemailer';
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { Booking, Therapist } from '../../layers';
-
-// Email configuration
-const EMAIL_CONFIG = {
-  host: process.env.SMTP_HOST || 'localhost',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || ''
-  }
-};
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@healthbooker.com';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-// Create transporter
-const transporter = nodemailer.createTransporter(EMAIL_CONFIG);
+// Create SES client
+const sesClient = new SESClient({ 
+  region: process.env.AWS_REGION || 'us-east-1' 
+});
 
 export const sendBookingConfirmationEmail = async (
   booking: Booking,
@@ -62,20 +53,26 @@ export const sendBookingConfirmationEmail = async (
   `;
 
   // Send email to patient
-  await transporter.sendMail({
-    from: FROM_EMAIL,
-    to: booking.patientEmail,
-    subject: `Appointment Confirmed with ${therapist.name}`,
-    html: patientEmailHtml
+  const patientCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [booking.patientEmail] },
+    Message: {
+      Subject: { Data: `Appointment Confirmed with ${therapist.name}` },
+      Body: { Html: { Data: patientEmailHtml } }
+    }
   });
+  await sesClient.send(patientCommand);
 
   // Send email to therapist
-  await transporter.sendMail({
-    from: FROM_EMAIL,
-    to: therapist.email,
-    subject: `New Appointment Booking - ${booking.patientName}`,
-    html: therapistEmailHtml
+  const therapistCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [therapist.email] },
+    Message: {
+      Subject: { Data: `New Appointment Booking - ${booking.patientName}` },
+      Body: { Html: { Data: therapistEmailHtml } }
+    }
   });
+  await sesClient.send(therapistCommand);
 };
 
 export const sendCancellationEmail = async (
@@ -116,20 +113,26 @@ export const sendCancellationEmail = async (
   `;
 
   // Send email to patient
-  await transporter.sendMail({
-    from: FROM_EMAIL,
-    to: booking.patientEmail,
-    subject: `Appointment Cancelled - ${therapist.name}`,
-    html: patientEmailHtml
+  const patientCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [booking.patientEmail] },
+    Message: {
+      Subject: { Data: `Appointment Cancelled - ${therapist.name}` },
+      Body: { Html: { Data: patientEmailHtml } }
+    }
   });
+  await sesClient.send(patientCommand);
 
   // Send email to therapist
-  await transporter.sendMail({
-    from: FROM_EMAIL,
-    to: therapist.email,
-    subject: `Appointment Cancelled - ${booking.patientName}`,
-    html: therapistEmailHtml
+  const therapistCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [therapist.email] },
+    Message: {
+      Subject: { Data: `Appointment Cancelled - ${booking.patientName}` },
+      Body: { Html: { Data: therapistEmailHtml } }
+    }
   });
+  await sesClient.send(therapistCommand);
 };
 
 function formatDate(dateStr: string): string {
