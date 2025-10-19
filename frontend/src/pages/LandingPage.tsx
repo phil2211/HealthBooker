@@ -40,9 +40,9 @@ const LandingPage: React.FC = () => {
                 <Button
                   variant="contained"
                   fullWidth
-                  onClick={() => navigate('/register')}
+                  onClick={() => navigate('/login')}
                 >
-                  Get Started
+                  Login
                 </Button>
               </CardContent>
             </Card>
