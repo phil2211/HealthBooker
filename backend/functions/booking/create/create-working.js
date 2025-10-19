@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 
 // Simple MongoDB connection
 let cachedConnection = null;
@@ -123,6 +124,90 @@ const bookingSchema = new mongoose.Schema({
 const Therapist = mongoose.model('Therapist', therapistSchema);
 const Booking = mongoose.model('Booking', bookingSchema);
 
+// SES Configuration
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@healthbooker.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+// Create SES client
+const sesClient = new SESClient({ 
+  region: process.env.AWS_REGION || 'us-east-1' 
+});
+
+// Email sending functions
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+const sendBookingConfirmationEmail = async (booking, therapist) => {
+  
+  const cancellationUrl = `${BASE_URL}/cancel/${booking.cancellationToken}`;
+  
+  const patientEmailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Appointment Confirmed</h2>
+      <p>Dear ${booking.patientName},</p>
+      <p>Your appointment has been confirmed with ${therapist.name}.</p>
+      
+      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <h3>Appointment Details:</h3>
+        <p><strong>Date:</strong> ${formatDate(booking.date)}</p>
+        <p><strong>Time:</strong> ${booking.startTime} - ${booking.endTime}</p>
+        <p><strong>Therapist:</strong> ${therapist.name}</p>
+        <p><strong>Specialization:</strong> ${therapist.specialization}</p>
+      </div>
+      
+      <p>If you need to cancel this appointment, please do so at least 24 hours in advance:</p>
+      <a href="${cancellationUrl}" style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Cancel Appointment</a>
+      
+      <p>Thank you for choosing our services!</p>
+    </div>
+  `;
+
+  const therapistEmailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>New Appointment Booking</h2>
+      <p>You have a new appointment booking.</p>
+      
+      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <h3>Appointment Details:</h3>
+        <p><strong>Date:</strong> ${formatDate(booking.date)}</p>
+        <p><strong>Time:</strong> ${booking.startTime} - ${booking.endTime}</p>
+        <p><strong>Patient:</strong> ${booking.patientName}</p>
+        <p><strong>Email:</strong> ${booking.patientEmail}</p>
+        <p><strong>Phone:</strong> ${booking.patientPhone}</p>
+      </div>
+    </div>
+  `;
+
+  // Send email to patient
+  const patientCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [booking.patientEmail] },
+    Message: {
+      Subject: { Data: `Appointment Confirmed with ${therapist.name}` },
+      Body: { Html: { Data: patientEmailHtml } }
+    }
+  });
+  await sesClient.send(patientCommand);
+
+  // Send email to therapist
+  const therapistCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [therapist.email] },
+    Message: {
+      Subject: { Data: `New Appointment Booking - ${booking.patientName}` },
+      Body: { Html: { Data: therapistEmailHtml } }
+    }
+  });
+  await sesClient.send(therapistCommand);
+};
+
 // Helper functions
 const createResponse = (statusCode, body, headers = {}) => ({
   statusCode,
@@ -235,14 +320,14 @@ exports.handler = async (event) => {
 
     await booking.save();
 
-    // Note: Email sending would be implemented here in production
-    // For now, we'll just log the booking
-    console.log('Booking created:', {
-      bookingId: booking._id,
-      therapistEmail: therapist.email,
-      patientEmail: patientEmail,
-      cancellationToken: cancellationToken
-    });
+    // Send confirmation emails
+    try {
+      await sendBookingConfirmationEmail(booking, therapist);
+      console.log('Booking confirmation emails sent successfully');
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Don't fail the booking if email fails
+    }
 
     return createResponse(201, {
       message: 'Booking created successfully',

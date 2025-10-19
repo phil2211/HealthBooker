@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 
 // Simple MongoDB connection
 let cachedConnection = null;
@@ -122,6 +123,83 @@ const bookingSchema = new mongoose.Schema({
 const Therapist = mongoose.model('Therapist', therapistSchema);
 const Booking = mongoose.model('Booking', bookingSchema);
 
+// SES Configuration
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@healthbooker.com';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+// Create SES client
+const sesClient = new SESClient({ 
+  region: process.env.AWS_REGION || 'us-east-1' 
+});
+
+// Email sending functions
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+const sendCancellationEmail = async (booking, therapist) => {
+  const patientEmailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Appointment Cancelled</h2>
+      <p>Dear ${booking.patientName},</p>
+      <p>Your appointment with ${therapist.name} has been cancelled.</p>
+      
+      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <h3>Cancelled Appointment Details:</h3>
+        <p><strong>Date:</strong> ${formatDate(booking.date)}</p>
+        <p><strong>Time:</strong> ${booking.startTime} - ${booking.endTime}</p>
+        <p><strong>Therapist:</strong> ${therapist.name}</p>
+      </div>
+      
+      <p>If you would like to book a new appointment, please visit our booking page.</p>
+      <p>Thank you!</p>
+    </div>
+  `;
+
+  const therapistEmailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Appointment Cancelled</h2>
+      <p>An appointment has been cancelled.</p>
+      
+      <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <h3>Cancelled Appointment Details:</h3>
+        <p><strong>Date:</strong> ${formatDate(booking.date)}</p>
+        <p><strong>Time:</strong> ${booking.startTime} - ${booking.endTime}</p>
+        <p><strong>Patient:</strong> ${booking.patientName}</p>
+        <p><strong>Email:</strong> ${booking.patientEmail}</p>
+      </div>
+    </div>
+  `;
+
+  // Send email to patient
+  const patientCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [booking.patientEmail] },
+    Message: {
+      Subject: { Data: `Appointment Cancelled - ${therapist.name}` },
+      Body: { Html: { Data: patientEmailHtml } }
+    }
+  });
+  await sesClient.send(patientCommand);
+
+  // Send email to therapist
+  const therapistCommand = new SendEmailCommand({
+    Source: FROM_EMAIL,
+    Destination: { ToAddresses: [therapist.email] },
+    Message: {
+      Subject: { Data: `Appointment Cancelled - ${booking.patientName}` },
+      Body: { Html: { Data: therapistEmailHtml } }
+    }
+  });
+  await sesClient.send(therapistCommand);
+};
+
 // Helper functions
 const createResponse = (statusCode, body, headers = {}) => ({
   statusCode,
@@ -186,15 +264,16 @@ exports.handler = async (event) => {
     booking.status = 'cancelled';
     await booking.save();
 
-    // Get therapist info for logging
+    // Get therapist info for email
     const therapist = await Therapist.findById(booking.therapistId);
     if (therapist) {
-      console.log('Booking cancelled:', {
-        bookingId: booking._id,
-        therapistEmail: therapist.email,
-        patientEmail: booking.patientEmail,
-        cancellationToken: cancellationToken
-      });
+      try {
+        await sendCancellationEmail(booking, therapist);
+        console.log('Cancellation emails sent successfully');
+      } catch (emailError) {
+        console.error('Cancellation email sending failed:', emailError);
+        // Don't fail the cancellation if email fails
+      }
     }
 
     return createResponse(200, {
