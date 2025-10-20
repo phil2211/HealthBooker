@@ -130,7 +130,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 // Create SES client
 const sesClient = new SESClient({ 
-  region: process.env.AWS_REGION || 'us-east-1' 
+  region: process.env.AWS_DEFAULT_REGION || 'eu-central-1' 
 });
 
 // Email sending functions

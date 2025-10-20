@@ -10,7 +10,6 @@ Globals:
       Variables:
         MONGODB_URI: !Ref MongoDBUri
         JWT_SECRET: !Ref JwtSecret
-        AWS_REGION: !Ref AwsRegion
         FROM_EMAIL: !Ref FromEmail
         BASE_URL: !Ref BaseUrl
 
