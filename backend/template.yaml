@@ -24,11 +24,6 @@ Parameters:
     Description: JWT secret key for authentication
     Default: your-super-secret-jwt-key-change-this-in-production
   
-  AwsRegion:
-    Type: String
-    Description: AWS region for SES service
-    Default: eu-central-1
-  
   FromEmail:
     Type: String
     Description: From email address
